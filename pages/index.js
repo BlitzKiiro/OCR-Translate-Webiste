@@ -30,7 +30,7 @@ export default function Home() {
   };
 
   return (
-    <div className={theme.mode}>
+    <div className={""}>
       <Head>
         <title>Online OCR</title>
         <meta name='viewport' content='initial-scale=1.0, width=device-width' />

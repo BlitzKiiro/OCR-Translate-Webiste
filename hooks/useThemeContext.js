@@ -2,8 +2,15 @@ import { useContext } from "react";
 import { ThemeContext } from "../context/ThemeContext";
 
 const useThemeContext = () => {
-  const conext = useContext(ThemeContext);
-  return conext;
+  const context = useContext(ThemeContext);
+
+  if (!context) {
+    throw Error(
+      "Error Please ThemeContext must be used inside ThemeContext Provider"
+    );
+  }
+
+  return context;
 };
 
 export default useThemeContext;

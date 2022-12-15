@@ -21,19 +21,29 @@ const getSystemTheme = () => {
   return mql.matches ? "dark" : "light";
 };
 
+const addThemeToDOM = (mode) => {
+  if (mode === "dark") document.documentElement.classList.add("dark");
+  else document.documentElement.classList.remove("dark");
+};
+
 const reducer = (state, action) => {
   switch (action.type) {
     case "LIGHT":
       storeTheme("light");
+      addThemeToDOM("light");
       return { mode: "light" };
     case "DARK":
       storeTheme("dark");
+      addThemeToDOM("dark");
       return { mode: "dark" };
     case "STORED":
-      return { mode: getStoredTheme() };
+      const mode = getStoredTheme();
+      addThemeToDOM(mode);
+      return { mode };
     default:
       clearStoredTheme();
-      return { mode: getSystemTheme() };
+      addThemeToDOM(getSystemTheme());
+      return { mode: "system" };
   }
 };
 
@@ -46,21 +56,14 @@ const ThemeContextProvider = (props) => {
     } else {
       dispatch({ type: "SYSTEM" });
     }
-  }, []);
 
-  useEffect(() => {
-    if (state.mode === "system") {
-      const mql = window.matchMedia("(prefers-color-scheme: dark)");
-
-      mql.addEventListener("change", ({ matches }) => {
-        if (matches) {
-          dispatch({ type: "DARK" });
-        } else {
-          dispatch({ type: "LIGHT" });
-        }
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", ({ matches }) => {
+        if (getStoredTheme()) return;
+        addThemeToDOM(getSystemTheme());
       });
-    }
-  }, [state.mode]);
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ theme: state, dispatch }}>
