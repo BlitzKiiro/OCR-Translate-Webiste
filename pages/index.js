@@ -2,14 +2,14 @@ import Head from "next/head";
 import Image from "next/image";
 import { useState } from "react";
 import styles from "../styles/Home.module.css";
-import useThemeContext from "../hooks/useThemeContext";
 import NavBar from "../components/Navbar";
 import Footer from "../components/Footer";
 import getBase64 from "../utils/getBase64";
-import uploadIcon from "../public/icons/upload.png";
+import uploadIcon from "../public/icons/imgicon.png";
+import { ArrowsRightLeftIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { Button, Badge, Spinner } from "flowbite-react";
 
 export default function Home() {
-  const { theme } = useThemeContext();
   const [Languages, setLanguages] = useState(["English", "Arabic "]);
   const [isLoading, setisLoading] = useState(true);
   const [viewImage, setViewImage] = useState("");
@@ -23,14 +23,13 @@ export default function Home() {
   };
 
   const handleUpload = async (fileList) => {
-    console.log(fileList);
     const b64Img = await getBase64(fileList[0]);
-    console.log(b64Img);
+
     setViewImage(b64Img);
   };
 
   return (
-    <div className={""}>
+    <div>
       <Head>
         <title>Online OCR</title>
         <meta name='viewport' content='initial-scale=1.0, width=device-width' />
@@ -40,32 +39,12 @@ export default function Home() {
         <NavBar />
         <div className=' m-5 md:m-15 py-5 px-3 rounded-xl bg-gray-100 dark:bg-slate-800'>
           {/* Lang Switch Button */}
-          <div className='flex  font-semibold text-lg '>
-            <span className='w-5/12 text-right'>{Languages[0]}</span>
-            <span className=' w-2/12 flex justify-center '>
-              <label className='transition  hover:text-blue-500   dark:hover:text-indigo-700 cursor-pointer'>
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  strokeWidth='1.5'
-                  stroke='currentColor'
-                  className='w-6 h-6'
-                >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    d='M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5'
-                  />
-                </svg>
-                <input
-                  onClick={swapLanguages}
-                  type='button'
-                  className='sr-only'
-                />
-              </label>
-            </span>
-            <span className='w-5/12 text-left'>{Languages[1]}</span>
+          <div className='flex gap-4 justify-center items-center text'>
+            <div className='w-20 text-right'>{Languages[0]}</div>
+            <Button onClick={swapLanguages} color='gray' outline pill>
+              <ArrowsRightLeftIcon className='w-3 h-3' />
+            </Button>
+            <div className='w-20 text-left'>{Languages[1]}</div>
           </div>
           {/* upload button and image area */}
           <div className=' flex justify-center items-center rounded-xl border-dashed border-2 border-gray-300 dark:border-gray-700 mt-4 px-4 py-6  '>
@@ -77,9 +56,9 @@ export default function Home() {
                   height={100}
                   objectFit='contain'
                 />
-                <p className='md:text-2xl  my-4 font-semibold text-center'>
+                <p className='md:text-2xl text-slate-600 dark:text-white  my-4 font-semibold text-center'>
                   Drag file here or{" "}
-                  <span className='dark:text-yellow-500 text-blue-400'>
+                  <span className='dark:text-yellow-300 text-blue-400'>
                     select file to upload
                   </span>
                 </p>
@@ -96,17 +75,31 @@ export default function Home() {
               <div className='relative'>
                 <span
                   onClick={clearImg}
-                  className='absolute cursor-pointer -top-2 -right-2 px-2 py-1 text-xs font-bold leading-none text-red-100 transform bg-red-600 rounded-full'
+                  className='absolute cursor-pointer -top-3 -right-4 px-2 py-1 z-10'
                 >
-                  X
+                  <Badge
+                    color='gray'
+                    className='justify-center border border-neutral-900 dark:border-neutral-200'
+                    style={{ width: 25, height: 25, borderRadius: 25 }}
+                  >
+                    <XMarkIcon className='w-4 h-4' />
+                  </Badge>
                 </span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={viewImage}
                   alt='uploaded img'
-                  className='object-contain max-h-[300px] '
+                  className={`object-contain max-h-[300px] ${
+                    isLoading ? "blur-sm" : "blur-none"
+                  }`}
                 />
-                {isLoading && <div className='w-full h-full absolute'>hi</div>}
+                {isLoading && (
+                  <div className=' absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center'>
+                    <div className='drop-shadow-lg bg-white py-3 px-5 rounded-[25%] '>
+                      <Spinner size='xl' />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

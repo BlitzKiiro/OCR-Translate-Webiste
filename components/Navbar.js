@@ -22,7 +22,7 @@ const Navbar = () => {
   };
 
   return (
-    <div className='grid grid-cols-4 items-center pt-5 px-10 md:pt-8 md:px-36'>
+    <div className='grid grid-cols-4 items-center mb-12 pt-5 px-10 md:pt-8 md:px-36'>
       {/* logo */}
       <div className='col-span-3 md:col-span-2'>
         <p className='md:text-xl font-semibold inline-block'>
@@ -32,7 +32,7 @@ const Navbar = () => {
       </div>
       {/* change theme drop down */}
       <div className='col-span-1 flex justify-end md:col-span-2'>
-        <Dropdown label={<ThemeIcon />} arrowIcon={false}>
+        <Dropdown label={<ThemeIcon />} arrowIcon={false} color={"gray"}>
           <Dropdown.Item
             onClick={() => {
               dispatch({ type: "LIGHT" });

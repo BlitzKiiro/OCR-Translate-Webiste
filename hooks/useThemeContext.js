@@ -6,7 +6,7 @@ const useThemeContext = () => {
 
   if (!context) {
     throw Error(
-      "Error Please ThemeContext must be used inside ThemeContext Provider"
+      "Error, ThemeContext must be used inside ThemeContext Provider"
     );
   }
 

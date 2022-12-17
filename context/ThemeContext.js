@@ -26,6 +26,17 @@ const addThemeToDOM = (mode) => {
   else document.documentElement.classList.remove("dark");
 };
 
+const init = (initialState) => {
+  let storedTheme = getStoredTheme();
+  if (storedTheme) {
+    addThemeToDOM(storedTheme);
+    return { mode: storedTheme };
+  } else {
+    addThemeToDOM(getSystemTheme());
+    return initialState;
+  }
+};
+
 const reducer = (state, action) => {
   switch (action.type) {
     case "LIGHT":
@@ -36,26 +47,20 @@ const reducer = (state, action) => {
       storeTheme("dark");
       addThemeToDOM("dark");
       return { mode: "dark" };
-    case "STORED":
-      const mode = getStoredTheme();
-      addThemeToDOM(mode);
-      return { mode };
-    default:
+    case "SYSTEM":
       clearStoredTheme();
       addThemeToDOM(getSystemTheme());
       return { mode: "system" };
+    default:
+      return init(state);
   }
 };
 
 const ThemeContextProvider = (props) => {
-  const [state, dispatch] = useReducer(reducer, { mode: "" });
+  const [state, dispatch] = useReducer(reducer, { mode: "system" });
 
   useEffect(() => {
-    if (getStoredTheme()) {
-      dispatch({ type: "STORED" });
-    } else {
-      dispatch({ type: "SYSTEM" });
-    }
+    dispatch({ type: "init" });
 
     window
       .matchMedia("(prefers-color-scheme: dark)")
