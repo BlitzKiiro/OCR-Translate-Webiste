@@ -2,14 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body,
-body > div:first-child,
-div#__next,
-div#__next > div {
-  height: 100%;
-}
-
-div#__next {
-  min-height: 720px;
+body {
+  @apply dark:bg-gray-900;
 }

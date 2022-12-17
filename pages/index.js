@@ -35,7 +35,7 @@ export default function Home() {
         <meta name='viewport' content='initial-scale=1.0, width=device-width' />
       </Head>
 
-      <div className=' h-full  dark:bg-gray-900  dark:text-white'>
+      <div className=' h-full   dark:text-white'>
         <NavBar />
         <div className=' m-5 md:m-15 py-5 px-3 rounded-xl bg-gray-100 dark:bg-slate-800'>
           {/* Lang Switch Button */}

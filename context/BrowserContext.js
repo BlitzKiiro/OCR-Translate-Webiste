@@ -1,33 +1,60 @@
-import { createContext, useReducer, useEffect } from "react";
-import { browserName, osName, deviceType } from "react-device-detect";
+import { createContext, useState, useEffect } from "react";
+import {
+  browserName,
+  osName,
+  osVersion,
+  deviceType,
+  mobileVendor,
+  mobileModel,
+} from "react-device-detect";
 
 export const BrowserContext = createContext();
 
 BrowserContext.displayName = "BrowserContext";
 
-const reducer = (state, action) => {
-  switch (action.type) {
-    case "setGeoData":
-      return { deviceInfo: state.deviceInfo, geoInfo: action.payload };
-  }
-};
-
 const BrowserContextProvider = (props) => {
-  const [state, dispatch] = useReducer(reducer, {
-    deviceInfo: { browserName, osName, deviceType },
+  const [info, setInfo] = useState({
+    deviceInfo: {},
     geoInfo: {},
   });
 
   useEffect(() => {
-    fetch("https://api.geoiplookup.net/?query=&json=true").then((res) => {
-      return res.json().then((data) => {
-        dispatch({ type: "setGeoData", payload: data });
+    const getGeoDataAndDeviceInfo = async () => {
+      const data = await (
+        await fetch("https://api.geoiplookup.net/?query=&json=true")
+      ).json();
+      const info = {
+        deviceInfo: {
+          browserName,
+          os: { name: osName, ver: osVersion },
+          deviceType,
+          mobileVendor,
+          mobileModel,
+        },
+        geoInfo: data,
+      };
+      setInfo(info);
+      return info;
+    };
+
+    const addVisit = async (info) => {
+      await fetch("https://639dc7653542a261304f8f96.mockapi.io/api/visits", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify(info),
       });
+    };
+
+    getGeoDataAndDeviceInfo().then((info) => {
+      addVisit(info);
     });
   }, []);
 
   return (
-    <BrowserContext.Provider value={{ info: state, dispatch }}>
+    <BrowserContext.Provider value={{ info }}>
       {props.children}
     </BrowserContext.Provider>
   );
