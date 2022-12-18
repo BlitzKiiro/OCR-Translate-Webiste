@@ -5,7 +5,7 @@ import {
   ComputerDesktopIcon,
 } from "@heroicons/react/24/solid";
 import { Dropdown } from "flowbite-react";
-import useThemeContext from "../hooks/useThemeContext";
+import useThemeContext from "../../hooks/useThemeContext";
 
 const Navbar = () => {
   const { theme, dispatch } = useThemeContext();

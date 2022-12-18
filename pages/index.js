@@ -2,12 +2,17 @@ import Head from "next/head";
 import Image from "next/image";
 import { useState } from "react";
 import styles from "../styles/Home.module.css";
-import NavBar from "../components/Navbar";
-import Footer from "../components/Footer";
+import NavBar from "../components/Layout/Navbar";
+import Footer from "../components/Layout/Footer";
 import getBase64 from "../utils/getBase64";
 import uploadIcon from "../public/icons/imgicon.png";
-import { ArrowsRightLeftIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import { Button, Badge, Spinner } from "flowbite-react";
+import {
+  ArrowsRightLeftIcon,
+  XMarkIcon,
+  FaceSmileIcon,
+} from "@heroicons/react/24/solid";
+import { Button, Badge, Spinner, Tooltip } from "flowbite-react";
+import FeedBack from "../components/Feedback";
 
 export default function Home() {
   const [Languages, setLanguages] = useState(["English", "Arabic "]);
@@ -38,13 +43,29 @@ export default function Home() {
       <div className=' h-full   dark:text-white'>
         <NavBar />
         <div className=' m-5 md:m-15 py-5 px-3 rounded-xl bg-gray-100 dark:bg-slate-800'>
-          {/* Lang Switch Button */}
-          <div className='flex gap-4 justify-center items-center text'>
-            <div className='w-20 text-right'>{Languages[0]}</div>
-            <Button onClick={swapLanguages} color='gray' outline pill>
-              <ArrowsRightLeftIcon className='w-3 h-3' />
-            </Button>
-            <div className='w-20 text-left'>{Languages[1]}</div>
+          {/* Options Panel */}
+          <div className='flex justify-center  relative'>
+            {/* Lang Switch Button */}
+            <div className='flex gap-4 justify-center items-center '>
+              <div className='w-20 text-right'>{Languages[0]}</div>
+              <Button onClick={swapLanguages} color='gray' outline pill>
+                <ArrowsRightLeftIcon className='w-3 h-3' />
+              </Button>
+              <div className='w-20 text-left'>{Languages[1]}</div>
+            </div>
+            <div className='hidden md:flex gap-5 absolute right-10'>
+              <Tooltip
+                content={<FeedBack />}
+                placement='bottom'
+                trigger='click'
+                animation='duration-500'
+              >
+                <Button color={"gray"} className='h-[42px]'>
+                  <FaceSmileIcon className='w-4 h-4' />
+                </Button>
+              </Tooltip>
+              <Button color={"gray"}>DownLoad</Button>
+            </div>
           </div>
           {/* upload button and image area */}
           <div className=' flex justify-center items-center rounded-xl border-dashed border-2 border-gray-300 dark:border-gray-700 mt-4 px-4 py-6  '>
