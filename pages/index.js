@@ -1,7 +1,6 @@
 import Head from "next/head";
 import Image from "next/image";
-import { useState } from "react";
-import styles from "../styles/Home.module.css";
+import { useState, useCallback } from "react";
 import NavBar from "../components/Layout/Navbar";
 import Footer from "../components/Layout/Footer";
 import getBase64 from "../utils/getBase64";
@@ -11,27 +10,76 @@ import {
   XMarkIcon,
   FaceSmileIcon,
 } from "@heroicons/react/24/solid";
-import { Button, Badge, Spinner, Tooltip } from "flowbite-react";
+import {
+  Button,
+  Badge,
+  Spinner,
+  Tooltip,
+  Textarea,
+  Label,
+} from "flowbite-react";
 import FeedBack from "../components/Feedback";
+
+const formatText = (textArray) => {
+  let formatedText = "";
+  textArray.forEach((line) => {
+    formatedText += line + "\n";
+  });
+  return formatedText;
+};
 
 export default function Home() {
   const [Languages, setLanguages] = useState(["English", "Arabic "]);
-  const [isLoading, setisLoading] = useState(true);
   const [viewImage, setViewImage] = useState("");
+  const [isLoading, setisLoading] = useState(false);
+  const [isError, setisError] = useState(false);
+  const [textResults, settextResults] = useState();
 
-  const swapLanguages = () => {
+  const swapLanguages = useCallback(() => {
     setLanguages([Languages[1], Languages[0]]);
-  };
+  }, [Languages]);
 
-  const clearImg = () => {
+  const clearResult = useCallback(() => {
+    settextResults(null);
     setViewImage(null);
-  };
+    setisError(null);
+  }, []);
 
-  const handleUpload = async (fileList) => {
-    const b64Img = await getBase64(fileList[0]);
+  const handleUpload = useCallback(
+    async (fileList) => {
+      let [srcLang, outLang] = ["", ""];
+      if (Languages[0] === "English") {
+        [srcLang, outLang] = ["eng", "ara"];
+      } else {
+        [srcLang, outLang] = ["ara", "eng"];
+      }
+      const img = await getBase64(fileList[0]);
+      setViewImage(img);
+      setisLoading(true);
 
-    setViewImage(b64Img);
-  };
+      const translateResult = await (
+        await fetch("/api/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            img,
+            srcLang,
+            outLang,
+          }),
+        })
+      ).json();
+      if (translateResult.detectedText) {
+        settextResults(translateResult);
+        setViewImage(null);
+      } else {
+        setisLoading(false);
+        setisError(true);
+      }
+    },
+    [Languages]
+  );
 
   return (
     <div>
@@ -64,12 +112,16 @@ export default function Home() {
                   <FaceSmileIcon className='w-4 h-4' />
                 </Button>
               </Tooltip>
-              <Button color={"gray"}>DownLoad</Button>
+              {(textResults || isError) && (
+                <Button color={"gray"} onClick={clearResult}>
+                  <XMarkIcon className='w-4 h-4' />
+                </Button>
+              )}
             </div>
           </div>
           {/* upload button and image area */}
           <div className=' flex justify-center items-center rounded-xl border-dashed border-2 border-gray-300 dark:border-gray-700 mt-4 px-4 py-6  '>
-            {!viewImage && (
+            {!(viewImage || textResults) && (
               <label className='relative flex flex-col justify-center  items-center w-[300px] cursor-pointer md:py-14'>
                 <Image
                   src={uploadIcon}
@@ -94,34 +146,78 @@ export default function Home() {
             )}
             {viewImage && (
               <div className='relative'>
-                <span
-                  onClick={clearImg}
-                  className='absolute cursor-pointer -top-3 -right-4 px-2 py-1 z-10'
-                >
-                  <Badge
-                    color='gray'
-                    className='justify-center border border-neutral-900 dark:border-neutral-200'
-                    style={{ width: 25, height: 25, borderRadius: 25 }}
-                  >
-                    <XMarkIcon className='w-4 h-4' />
-                  </Badge>
-                </span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={viewImage}
                   alt='uploaded img'
-                  className={`object-contain max-h-[300px] ${
-                    isLoading ? "blur-sm" : "blur-none"
-                  }`}
+                  className='object-contain max-h-[300px] blur-sm '
                 />
-                {isLoading && (
-                  <div className=' absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center'>
+
+                <div className=' absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center'>
+                  {isLoading && (
                     <div className='drop-shadow-lg bg-white py-3 px-5 rounded-[25%] '>
                       <Spinner size='xl' />
                     </div>
-                  </div>
-                )}
+                  )}
+                  {isError && (
+                    <div className='bg-black/70  p-5 rounded-[15px]'>
+                      <p className='text-red-500 text-sm text-center'>
+                        An Error occured while proccessing this img, please try
+                        again.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
+            )}
+            {textResults && (
+              <div className='grid grid-cols-2 w-full justify-center items-center gap-x-10'>
+                <div className='col-span-2 md:col-span-1'>
+                  <div id='textarea1'>
+                    <div className='mb-2 block'>
+                      <Label htmlFor='comment' value='Detected Text' />
+                    </div>
+                    <Textarea
+                      className='resize-none'
+                      id='original'
+                      rows={8}
+                      value={formatText(textResults.detectedText)}
+                      readOnly
+                    />
+                  </div>
+                </div>
+                <div className='col-span-2 md:col-span-1'>
+                  <div id='textarea2'>
+                    <div className='mb-2 block'>
+                      <Label htmlFor='comment' value='Translated Text' />
+                    </div>
+                    <Textarea
+                      className='resize-none'
+                      id='original'
+                      rows={8}
+                      value={formatText(textResults.translatedText)}
+                      readOnly
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className='flex justify-center md:hidden gap-5 mt-3'>
+            <Tooltip
+              content={<FeedBack />}
+              placement='bottom'
+              trigger='click'
+              animation='duration-500'
+            >
+              <Button color={"gray"} className='h-[42px]'>
+                <FaceSmileIcon className='w-4 h-4' />
+              </Button>
+            </Tooltip>
+            {(textResults || isError) && (
+              <Button onClick={clearResult} color={"gray"}>
+                <XMarkIcon className='w-4 h-4' />
+              </Button>
             )}
           </div>
         </div>

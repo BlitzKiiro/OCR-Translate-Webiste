@@ -9,16 +9,24 @@ const FeedBack = () => {
 
   const sendFeedback = useCallback(
     async (feed) => {
-      await fetch("https://639dc7653542a261304f8f96.mockapi.io/api/feedbacks", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-
-        body: JSON.stringify({ feed, info }),
-      });
       localStorage.setItem("feedbackGiven", true);
       setisGiven(true);
+      try {
+        await fetch(
+          "https://639dc7653542a261304f8f96.mockapi.io/api/feedbacks",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+
+            body: JSON.stringify({ feed, info }),
+          }
+        );
+      } catch (error) {
+        localStorage.removeItem("feedbackGiven");
+        setisGiven(false);
+      }
     },
     [info]
   );
@@ -73,12 +81,7 @@ const FeedBack = () => {
       {isGiven && (
         <div className='flex flex-col justify-center  items-center'>
           <div className='flex justify-center gap-4 px-1 pt-4 pb-2'>
-            <img
-              className='cursor-pointer'
-              src='/svgs/happy.svg'
-              alt='angry'
-              width={80}
-            />
+            <img src='/svgs/happy.svg' alt='thanks' width={80} />
           </div>
           <p className='font-semibold text-[16px] text-center pb-4'>
             Thanks for the feedback 👍
